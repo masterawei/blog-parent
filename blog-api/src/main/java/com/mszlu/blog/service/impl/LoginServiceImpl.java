@@ -77,4 +77,10 @@ public class LoginServiceImpl implements LoginService {
         return JSON.parseObject(userJson, SysUser.class);
 
     }
+
+    @Override
+    public Result logout(String token) {
+        redisTemplate.delete("TOKEN_"+token);
+        return Result.success(null);
+    }
 }
