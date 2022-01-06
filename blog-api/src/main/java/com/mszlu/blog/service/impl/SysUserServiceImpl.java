@@ -11,12 +11,14 @@ import com.mszlu.blog.vo.Result;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author by away
  * @date 2022/1/5 14:20
  */
 @Service
+
 public class SysUserServiceImpl implements SysUserService {
     @Autowired
     private SysUserMapper sysUserMapper;
@@ -73,5 +75,21 @@ public class SysUserServiceImpl implements SysUserService {
         return Result.success(loginUserVo);
 
 
+    }
+
+    @Override
+    public SysUser findUserByAccount(String account) {
+        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysUser::getAccount, account);
+        queryWrapper.last("limit 1");
+        return this.sysUserMapper.selectOne(queryWrapper);
+
+    }
+
+    @Override
+    public void save(SysUser sysUser) {
+        //保存用户 的id会自动生成
+        //这个地方默认生成的id是分布式id 雪花算法
+        this.sysUserMapper.insert(sysUser);
     }
 }

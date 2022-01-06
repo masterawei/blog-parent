@@ -8,6 +8,7 @@ import com.mszlu.blog.vo.params.LoginParam;
  * @author by away
  * @date 2022/1/6 13:24
  */
+
 public interface LoginService  {
     /**
      * 登录功能
@@ -17,5 +18,17 @@ public interface LoginService  {
 
     SysUser checkToken(String token);
 
+    /**
+     * 退出登录
+     * @param token
+     * @return
+     */
     Result logout(String token);
+
+    /**
+     * 注册
+     * @param loginParam
+     * @return
+     */
+    Result register(LoginParam loginParam);
 }
