@@ -40,4 +40,14 @@ public class ArticleController {
         int limit = 5;
         return articleService.hotArticle(limit);
     }
+
+    /**
+     * 首页最新文章
+     * @return
+     */
+    @PostMapping("new")
+    public Result newArticles() {
+        int limit = 5;
+        return articleService.newArticles(limit);
+    }
 }
