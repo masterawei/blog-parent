@@ -2,6 +2,7 @@ package com.mszlu.blog.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mszlu.blog.dao.dos.Archives;
 import com.mszlu.blog.dao.mapper.ArticleMapper;
 import com.mszlu.blog.dao.pojo.Article;
 import com.mszlu.blog.service.ArticleService;
@@ -72,6 +73,14 @@ public class ArticleServiceImpl implements ArticleService {
 
         return Result.success(copyList(articles, false, false));
     }
+
+    @Override
+    public Result listArchives() {
+        // 文章归档
+        List<Archives> archivesList = articleMapper.listArchives();
+        return Result.success(archivesList);
+    }
+
 
 
     private List<ArticleVo> copyList(List<Article> records,boolean isTag,boolean isAuthor) {
