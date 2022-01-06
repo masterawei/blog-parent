@@ -1,5 +1,6 @@
 package com.mszlu.blog.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.mszlu.blog.dao.mapper.SysUserMapper;
 import com.mszlu.blog.dao.pojo.SysUser;
 import com.mszlu.blog.service.SysUserService;
@@ -25,5 +26,17 @@ public class SysUserServiceImpl implements SysUserService {
         }
         return sysUser;
 
+    }
+
+    @Override
+    public SysUser findUser(String account, String password) {
+        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysUser::getAccount,account);
+        queryWrapper.eq(SysUser::getPassword,password);
+        queryWrapper.select(SysUser::getAccount, SysUser::getId, SysUser::getAvatar, SysUser::getNickname);
+        queryWrapper.last("limit 1");
+
+
+        return sysUserMapper.selectOne(queryWrapper);
     }
 }
