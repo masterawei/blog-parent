@@ -3,6 +3,7 @@ package com.mszlu.blog.handler;
 import com.alibaba.fastjson.JSON;
 import com.mszlu.blog.dao.pojo.SysUser;
 import com.mszlu.blog.service.LoginService;
+import com.mszlu.blog.utils.UserThreadLocal;
 import com.mszlu.blog.vo.ErrorCode;
 import com.mszlu.blog.vo.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +70,13 @@ public class LoginInterceptor implements HandlerInterceptor {
         }
         //登录成功,放行
         //我希望在controller中 直接获取用户信息
+        UserThreadLocal.put(sysUser);
         return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        //如果不删除ThreadLocal中用完的信息,会有内存泄露的风险
+        UserThreadLocal.remove();
     }
 }
