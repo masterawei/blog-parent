@@ -1,0 +1,21 @@
+package com.mszlu.blog.dao.pojo;
+
+import lombok.Data;
+
+/**
+ * 类别
+ *
+ * @author away
+ */
+@Data
+public class Category {
+
+    private Long id;
+
+    private String avatar;
+
+    private String categoryName;
+
+    private String description;
+}
+

@@ -1,5 +1,7 @@
 package com.mszlu.blog.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.mszlu.blog.dao.pojo.SysUser;
 import com.mszlu.blog.dao.pojo.Tag;
 import lombok.Data;
@@ -8,7 +10,7 @@ import java.util.List;
 
 @Data
 public class ArticleVo {
-
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     private String title;
@@ -27,11 +29,11 @@ public class ArticleVo {
 
     private String author;
 
-    //private ArticleBodyVo body;
+    private ArticleBodyVo body;
 
     private List<TagVo> tags;
 
-    //private List<CategoryVo> categorys;
+    private CategoryVo category;
 
 }
 
