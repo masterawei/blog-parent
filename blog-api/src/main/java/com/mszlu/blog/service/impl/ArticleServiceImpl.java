@@ -7,10 +7,7 @@ import com.mszlu.blog.dao.mapper.ArticleBodyMapper;
 import com.mszlu.blog.dao.mapper.ArticleMapper;
 import com.mszlu.blog.dao.pojo.Article;
 import com.mszlu.blog.dao.pojo.ArticleBody;
-import com.mszlu.blog.service.ArticleService;
-import com.mszlu.blog.service.CategoryService;
-import com.mszlu.blog.service.SysUserService;
-import com.mszlu.blog.service.TagService;
+import com.mszlu.blog.service.*;
 import com.mszlu.blog.vo.ArticleBodyVo;
 import com.mszlu.blog.vo.ArticleVo;
 import com.mszlu.blog.vo.Result;
@@ -84,6 +81,11 @@ public class ArticleServiceImpl implements ArticleService {
         List<Archives> archivesList = articleMapper.listArchives();
         return Result.success(archivesList);
     }
+
+    @Autowired
+    private ThreadService threadService;
+
+
     /**
      * 1.根据id查询文章信息
      * 2.根据bodyId和categoryId去关联查询
@@ -95,6 +97,13 @@ public class ArticleServiceImpl implements ArticleService {
         Article article = this.articleMapper.selectById(articleId);
 
         ArticleVo articleVo = copy(article, true, true,true,true);
+
+        //查看完文章后,新增阅读数,有没有问题呢?
+        //查看万文章之后,本应该直接返回数据了,这个时候做了一个更新操作,更新时加写锁,阻塞其他读操作,性能就会比较低
+        //更新增加了此次接口,耗时  如果一旦更新出现问题,不能影响查看文章的操作
+        //线程池 可以把更新操作,扔到线程池中去执行,和主线程就不相关了
+        threadService.updateArticleViewCount(articleMapper,article);
+
         return Result.success(articleVo);
     }
 
