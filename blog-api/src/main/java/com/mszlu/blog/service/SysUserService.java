@@ -2,12 +2,16 @@ package com.mszlu.blog.service;
 
 import com.mszlu.blog.dao.pojo.SysUser;
 import com.mszlu.blog.vo.Result;
+import com.mszlu.blog.vo.UserVo;
 
 /**
  * @author by away
  * @date 2022/1/5 14:19
  */
 public interface SysUserService {
+
+    UserVo findUserVoById(Long id);
+
     SysUser findUserById(Long id);
 
     SysUser findUser(String account, String password);
