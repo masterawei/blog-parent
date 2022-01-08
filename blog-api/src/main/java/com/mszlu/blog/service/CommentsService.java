@@ -1,6 +1,7 @@
 package com.mszlu.blog.service;
 
 import com.mszlu.blog.vo.Result;
+import com.mszlu.blog.vo.params.CommentParam;
 
 /**
  * @author by away
@@ -13,4 +14,11 @@ public interface CommentsService {
      * @return
      */
     Result commentsByArticleId(Long id);
+
+    /**
+     * 评论
+     * @param commentParam
+     * @return
+     */
+    Result comment(CommentParam commentParam);
 }
