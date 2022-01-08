@@ -19,4 +19,6 @@ public interface TagService {
      * @return
      */
     Result findAll();
+
+    Result findAllDetail();
 }
