@@ -15,40 +15,40 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 
 /**
- * @author by away
- * @date 2022/1/8 16:14
+ * @Author ljm
+ * @Date 2021/10/18 21:01
+ * @Version 1.0
  */
 @Component
-//切面，定义了通知和切点的关系
-@Aspect
+@Aspect //切面 定义了通知和切点的关系
 @Slf4j
 public class LogAspect {
-    @Pointcut("@annotation(com.mszlu.blog.common.aop.LogAnnotation)")
-    public void pt() {
 
+    @Pointcut("@annotation(com.mszlu.blog.common.aop.LogAnnotation)")
+    public void pt(){
     }
 
-    /**
-     * 环绕通知
-     */
+    //环绕通知
     @Around("pt()")
-    public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object log(ProceedingJoinPoint point) throws Throwable {
         long beginTime = System.currentTimeMillis();
         //执行方法
-        Object result = joinPoint.proceed();
-        //执行时间
+        Object result = point.proceed();
+        //执行时长(毫秒)
         long time = System.currentTimeMillis() - beginTime;
-
-        recordLog(joinPoint,time);
+        //保存日志
+        recordLog(point, time);
         return result;
+
     }
+
     private void recordLog(ProceedingJoinPoint joinPoint, long time) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         LogAnnotation logAnnotation = method.getAnnotation(LogAnnotation.class);
         log.info("=====================log start================================");
         log.info("module:{}",logAnnotation.module());
-        log.info("operation:{}",logAnnotation.operator());
+        log.info("operation:{}",logAnnotation.operation());
 
         //请求的方法名
         String className = joinPoint.getTarget().getClass().getName();
@@ -69,4 +69,8 @@ public class LogAspect {
         log.info("=====================log end================================");
     }
 
+
+
+
 }
+
