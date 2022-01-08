@@ -5,13 +5,18 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mszlu.blog.dao.dos.Archives;
 import com.mszlu.blog.dao.mapper.ArticleBodyMapper;
 import com.mszlu.blog.dao.mapper.ArticleMapper;
+import com.mszlu.blog.dao.mapper.ArticleTagMapper;
 import com.mszlu.blog.dao.pojo.Article;
 import com.mszlu.blog.dao.pojo.ArticleBody;
+import com.mszlu.blog.dao.pojo.ArticleTag;
+import com.mszlu.blog.dao.pojo.SysUser;
 import com.mszlu.blog.service.*;
+import com.mszlu.blog.utils.UserThreadLocal;
 import com.mszlu.blog.vo.ArticleBodyVo;
 import com.mszlu.blog.vo.ArticleVo;
 import com.mszlu.blog.vo.Result;
 import com.mszlu.blog.vo.TagVo;
+import com.mszlu.blog.vo.params.ArticleParam;
 import com.mszlu.blog.vo.params.PageParams;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
@@ -20,7 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author by away
@@ -34,6 +41,9 @@ public class ArticleServiceImpl implements ArticleService {
     private TagService tagService;
     @Autowired
     private SysUserService sysUserService;
+
+    @Autowired
+    private ArticleTagMapper articleTagMapper;
 
 
     @Override
@@ -105,6 +115,52 @@ public class ArticleServiceImpl implements ArticleService {
         threadService.updateArticleViewCount(articleMapper,article);
 
         return Result.success(articleVo);
+    }
+
+    /**
+     * 1.发布文章,墓地构建Article对象
+     * 2.作者id: 当前登录用户(前提是当前用户登陆了,所以需要把写文章放入拦截器)
+     * 3.标签tag: 要将标签加入到关联列表中
+     * 4.内存body:
+     *
+     * @param articleParam
+     * @return
+     */
+    @Override
+    public Result publish(ArticleParam articleParam) {
+        SysUser sysUser = UserThreadLocal.get();
+        Article article = new Article();
+        article.setAuthorId(sysUser.getId());
+        article.setWeight(Article.Article_Common);
+        article.setViewCounts(0);
+        article.setTitle(articleParam.getTitle());
+        article.setSummary(articleParam.getSummary());
+        article.setCommentCounts(0);
+        article.setCreateDate(System.currentTimeMillis());
+        article.setCategoryId(articleParam.getCategory().getId());
+        articleMapper.insert(article);
+        List<TagVo> tags = articleParam.getTags();
+        if (tags != null) {
+            for (TagVo tag : tags) {
+                Long articleId = article.getId();
+                ArticleTag articleTag = new ArticleTag();
+                articleTag.setTagId(tag.getId());
+                articleTag.setArticleId(articleId);
+                articleTagMapper.insert(articleTag);
+            }
+        }
+        //body
+        ArticleBody articleBody = new ArticleBody();
+        articleBody.setArticleId(article.getId());
+        articleBody.setContent(articleParam.getBody().getContent());
+        articleBody.setContentHtml(articleParam.getBody().getContentHtml());
+        articleBodyMapper.insert(articleBody);
+        article.setBodyId(articleBody.getId());
+
+        articleMapper.updateById(article);
+        Map<String, String> map = new HashMap<>();
+        map.put("id",article.getId().toString());
+        return Result.success(map);
     }
 
 
