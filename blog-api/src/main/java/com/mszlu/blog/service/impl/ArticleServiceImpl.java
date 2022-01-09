@@ -46,10 +46,19 @@ public class ArticleServiceImpl implements ArticleService {
     private ArticleTagMapper articleTagMapper;
 
 
+    /**
+     * 因为有两个请求都需要使用到这个方法,只需要进行一个条件判断,就可以进行区分,具体如下
+     * @param pageParams
+     * @return
+     */
     @Override
     public Result listArticle(PageParams pageParams) {
         Page<Article> page = new Page<>(pageParams.getPage(), pageParams.getPageSize());
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+
+        if (pageParams.getCategoryId() != null) {
+            queryWrapper.eq(Article::getCategoryId, pageParams.getCategoryId());
+        }
         ///是否置顶
         //order by create_date
         queryWrapper.orderByDesc(Article::getWeight,Article::getCreateDate);
@@ -118,7 +127,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     /**
-     * 1.发布文章,墓地构建Article对象
+     * 1.发布文章,目的构建Article对象
      * 2.作者id: 当前登录用户(前提是当前用户登陆了,所以需要把写文章放入拦截器)
      * 3.标签tag: 要将标签加入到关联列表中
      * 4.内存body:
