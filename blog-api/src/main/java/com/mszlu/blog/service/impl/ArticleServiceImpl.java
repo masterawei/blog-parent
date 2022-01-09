@@ -6,10 +6,7 @@ import com.mszlu.blog.dao.dos.Archives;
 import com.mszlu.blog.dao.mapper.ArticleBodyMapper;
 import com.mszlu.blog.dao.mapper.ArticleMapper;
 import com.mszlu.blog.dao.mapper.ArticleTagMapper;
-import com.mszlu.blog.dao.pojo.Article;
-import com.mszlu.blog.dao.pojo.ArticleBody;
-import com.mszlu.blog.dao.pojo.ArticleTag;
-import com.mszlu.blog.dao.pojo.SysUser;
+import com.mszlu.blog.dao.pojo.*;
 import com.mszlu.blog.service.*;
 import com.mszlu.blog.utils.UserThreadLocal;
 import com.mszlu.blog.vo.ArticleBodyVo;
@@ -58,6 +55,20 @@ public class ArticleServiceImpl implements ArticleService {
 
         if (pageParams.getCategoryId() != null) {
             queryWrapper.eq(Article::getCategoryId, pageParams.getCategoryId());
+        }
+        List<Long> articleIdList = new ArrayList<>();
+        if (pageParams.getTagId() != null) {
+            //文章里面没有tagId这个属性,需要通过额外的表来查询
+            LambdaQueryWrapper<ArticleTag> articleTagLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            articleTagLambdaQueryWrapper.eq(ArticleTag::getTagId, pageParams.getTagId());
+            List<ArticleTag> articleTags = articleTagMapper.selectList(articleTagLambdaQueryWrapper);
+            for (ArticleTag articleTag : articleTags) {
+                articleIdList.add(articleTag.getArticleId());
+            }
+            if (articleIdList.size() > 0) {
+                // and id in (1,2,3)
+                queryWrapper.in(Article::getId,articleIdList);
+            }
         }
         ///是否置顶
         //order by create_date
