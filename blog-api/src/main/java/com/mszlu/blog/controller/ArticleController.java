@@ -1,6 +1,7 @@
 package com.mszlu.blog.controller;
 
 import com.mszlu.blog.common.aop.LogAnnotation;
+import com.mszlu.blog.common.cache.Cache;
 import com.mszlu.blog.service.ArticleService;
 import com.mszlu.blog.vo.Result;
 import com.mszlu.blog.vo.params.ArticleParam;
@@ -28,6 +29,7 @@ public class ArticleController {
      */
     @PostMapping
     @LogAnnotation(module="文章",operation="获取文章列表")
+    @Cache(expire = 60*1000,name = "listArticle")
     public Result listArticle(@RequestBody PageParams pageParams) {
 
         return articleService.listArticle(pageParams);
