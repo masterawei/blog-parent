@@ -1,6 +1,7 @@
 package com.mszlu.blog.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mszlu.blog.dao.dos.Archives;
 import com.mszlu.blog.dao.mapper.ArticleBodyMapper;
@@ -51,35 +52,49 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public Result listArticle(PageParams pageParams) {
         Page<Article> page = new Page<>(pageParams.getPage(), pageParams.getPageSize());
-        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        IPage<Article> articleIPage = articleMapper.listArticle(
+                page,
+                pageParams.getCategoryId(),
+                pageParams.getTagId(),
+                pageParams.getYear(),
+                pageParams.getMonth());
+        List<Article> records = articleIPage.getRecords();
+        return Result.success(copyList(records,true,true));
 
-        if (pageParams.getCategoryId() != null) {
-            queryWrapper.eq(Article::getCategoryId, pageParams.getCategoryId());
-        }
-        List<Long> articleIdList = new ArrayList<>();
-        if (pageParams.getTagId() != null) {
-            //文章里面没有tagId这个属性,需要通过额外的表来查询
-            LambdaQueryWrapper<ArticleTag> articleTagLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            articleTagLambdaQueryWrapper.eq(ArticleTag::getTagId, pageParams.getTagId());
-            List<ArticleTag> articleTags = articleTagMapper.selectList(articleTagLambdaQueryWrapper);
-            for (ArticleTag articleTag : articleTags) {
-                articleIdList.add(articleTag.getArticleId());
-            }
-            if (articleIdList.size() > 0) {
-                // and id in (1,2,3)
-                queryWrapper.in(Article::getId,articleIdList);
-            }
-        }
-        ///是否置顶
-        //order by create_date
-        queryWrapper.orderByDesc(Article::getWeight,Article::getCreateDate);
-        Page<Article> articlePage = articleMapper.selectPage(page, queryWrapper);
-        List<Article> records = articlePage.getRecords();
-        //能直接返回吗？不能！
-        List<ArticleVo> articleVoList = copyList(records,true,true);
 
-        return Result.success(articleVoList);
     }
+    //@Override
+    //public Result listArticle(PageParams pageParams) {
+    //    Page<Article> page = new Page<>(pageParams.getPage(), pageParams.getPageSize());
+    //    LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+    //
+    //    if (pageParams.getCategoryId() != null) {
+    //        queryWrapper.eq(Article::getCategoryId, pageParams.getCategoryId());
+    //    }
+    //    List<Long> articleIdList = new ArrayList<>();
+    //    if (pageParams.getTagId() != null) {
+    //        //文章里面没有tagId这个属性,需要通过额外的表来查询
+    //        LambdaQueryWrapper<ArticleTag> articleTagLambdaQueryWrapper = new LambdaQueryWrapper<>();
+    //        articleTagLambdaQueryWrapper.eq(ArticleTag::getTagId, pageParams.getTagId());
+    //        List<ArticleTag> articleTags = articleTagMapper.selectList(articleTagLambdaQueryWrapper);
+    //        for (ArticleTag articleTag : articleTags) {
+    //            articleIdList.add(articleTag.getArticleId());
+    //        }
+    //        if (articleIdList.size() > 0) {
+    //            // and id in (1,2,3)
+    //            queryWrapper.in(Article::getId,articleIdList);
+    //        }
+    //    }
+    //    ///是否置顶
+    //    //order by create_date
+    //    queryWrapper.orderByDesc(Article::getWeight,Article::getCreateDate);
+    //    Page<Article> articlePage = articleMapper.selectPage(page, queryWrapper);
+    //    List<Article> records = articlePage.getRecords();
+    //    //能直接返回吗？不能！
+    //    List<ArticleVo> articleVoList = copyList(records,true,true);
+    //
+    //    return Result.success(articleVoList);
+    //}
 
     @Override
     public Result hotArticle(int limit) {
