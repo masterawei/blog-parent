@@ -9,7 +9,7 @@ import lombok.Data;
 public class LoginUserVo {
 	//与页面交互
 
-    private Long id;
+    private String id;
 
     private String account;
 
